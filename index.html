@@ -281,8 +281,9 @@
                     </table>
                 </div>
                 
-                <div class="hidden print-only mt-8 pt-2 flex justify-end text-[11px]" style="page-break-inside: avoid;">
-                    <div class="text-center w-56">
+                <!-- TANDA TANGAN RATA KANAN -->
+                <div class="hidden print-only mt-8 pt-2 text-[11px]" style="page-break-inside: avoid; display: flex; justify-content: flex-end; width: 100%;">
+                    <div class="text-center" style="width: 220px; margin-left: auto;">
                         <p class="mb-1">Bangkalan, <span id="printDateSign"></span></p>
                         <p class="font-medium mb-16">Kepala SMK Al - Asy'ari,</p>
                         <p class="font-bold underline tracking-wide">ANSORI, M.Pd</p>
@@ -475,7 +476,6 @@
         if (closeToggle) closeToggle.addEventListener('click', closeSidebar);
         if (overlay) overlay.addEventListener('click', closeSidebar);
 
-        // Bungkus tindakan menu agar sidebar otomatis menutup saat menu diklik (opsional, kecuali modal)
         function wrapSidebarAction(fnName, ...args) {
             closeSidebar();
             if (typeof window[fnName] === 'function') {
@@ -483,7 +483,6 @@
             }
         }
 
-        // Variabel & Logika Aplikasi Asli
         const CLIENT_ID = '956582858544-ubq9akls27e7soh9ls77ppdojtig6gf5.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
@@ -501,7 +500,6 @@
         let transaksiList = JSON.parse(localStorage.getItem('transaksi_kas_smk')) || [];
         document.getElementById('tanggal').valueAsDate = new Date();
 
-        // Helper Autoformat Titik Ribuan Realtime (Smooth Kursor Posisi)
         function setupAutoNumberFormat(inputEl) {
             inputEl.addEventListener('input', function (e) {
                 let cursorPosition = e.target.selectionStart;
@@ -633,7 +631,6 @@
             const loggedText = document.getElementById('loggedInUserText');
             const formContainer = document.getElementById('formContainer');
 
-            // Semua role (termasuk kepsek) kini memiliki akses penuh (input, update, delete)
             let namaRoleTampil = role === 'admin' ? 'Admin' : (role === 'kepsek' ? 'Kepala Sekolah' : 'Bendahara');
             roleBadge.innerText = namaRoleTampil;
             roleBadge.className = 'text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60';
