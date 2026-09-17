@@ -633,20 +633,13 @@
             const loggedText = document.getElementById('loggedInUserText');
             const formContainer = document.getElementById('formContainer');
 
-            if (role === 'kepsek') {
-                roleBadge.innerText = 'Kepala Sekolah (Monitor)';
-                roleBadge.className = 'text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60';
-                loggedText.innerText = 'Login sebagai Kepala Sekolah (Mode Baca/Cetak)';
-                formContainer.classList.add('no-print');
-                document.querySelectorAll('.col-aksi').forEach(el => el.classList.add('hidden'));
-            } else {
-                let namaRoleTampil = role === 'admin' ? 'Admin' : 'Bendahara';
-                roleBadge.innerText = namaRoleTampil;
-                roleBadge.className = 'text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60';
-                loggedText.innerText = `Masuk sebagai ${namaRoleTampil}`;
-                formContainer.classList.remove('no-print');
-                document.querySelectorAll('.col-aksi').forEach(el => el.classList.remove('hidden'));
-            }
+            // Semua role (termasuk kepsek) kini memiliki akses penuh (input, update, delete)
+            let namaRoleTampil = role === 'admin' ? 'Admin' : (role === 'kepsek' ? 'Kepala Sekolah' : 'Bendahara');
+            roleBadge.innerText = namaRoleTampil;
+            roleBadge.className = 'text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60';
+            loggedText.innerText = `Masuk sebagai ${namaRoleTampil}`;
+            formContainer.classList.remove('no-print');
+            document.querySelectorAll('.col-aksi').forEach(el => el.classList.remove('hidden'));
         }
 
         function formatRupiah(angka) {
@@ -686,7 +679,6 @@
                 globalTotalMasuk += masuk;
                 globalTotalKeluar += keluar;
 
-                let isKepsek = loggedInRole === 'kepsek';
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition";
                 tr.innerHTML = `
@@ -696,7 +688,7 @@
                     <td class="py-3 px-4 text-right text-emerald-600 font-medium">${masuk ? 'Rp ' + formatRupiah(masuk) : '-'}</td>
                     <td class="py-3 px-4 text-right text-rose-600 font-medium">${keluar ? 'Rp ' + formatRupiah(keluar) : '-'}</td>
                     <td class="py-3 px-4 text-right text-slate-900 font-semibold">Rp ${formatRupiah(saldoBerjalan)}</td>
-                    <td class="py-3 px-4 text-center no-print ${isKepsek ? 'hidden' : ''}">
+                    <td class="py-3 px-4 text-center no-print col-aksi">
                         <div class="flex items-center justify-center gap-1">
                             <button onclick="bukaModalUpdate(${index})" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 text-[11px] font-semibold px-2 py-1 rounded-lg transition" title="Edit">
                                 Edit
@@ -723,10 +715,6 @@
 
         function tambahTransaksi(event) {
             event.preventDefault();
-            if (loggedInRole === 'kepsek') {
-                alert('Kepala Sekolah berada pada mode baca/monitor.');
-                return;
-            }
             const tanggal = document.getElementById('tanggal').value;
             const uraian = document.getElementById('uraian').value;
             const jenis = document.getElementById('jenis').value;
@@ -749,7 +737,6 @@
         }
 
         function bukaModalHapus(index) {
-            if (loggedInRole === 'kepsek') return;
             const item = transaksiList[index];
             document.getElementById('hapusTargetIndex').value = index;
             document.getElementById('hapusDetailText').innerHTML = `Hapus transaksi <strong>"${item.uraian}"</strong> senilai <strong>Rp ${formatRupiah(item.nominal)}</strong>?`;
@@ -771,7 +758,6 @@
         }
 
         function bukaModalUpdate(index) {
-            if (loggedInRole === 'kepsek') return;
             const item = transaksiList[index];
             document.getElementById('editIndex').value = index;
             document.getElementById('editTanggal').value = item.tanggal;
@@ -788,7 +774,6 @@
 
         function simpanUpdateTransaksi(event) {
             event.preventDefault();
-            if (loggedInRole === 'kepsek') return;
 
             const index = parseInt(document.getElementById('editIndex').value);
             const tanggalBaru = document.getElementById('editTanggal').value;
