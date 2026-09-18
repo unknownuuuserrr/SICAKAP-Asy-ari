@@ -226,29 +226,21 @@
                 </form>
             </div>
 
-            <!-- ================= PANEL FILTER & TAMPILAN 31 HARI ================= -->
+            <!-- ================= PANEL FILTER RENTANG TANGGAL ================= -->
             <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-xs no-print space-y-3">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Filter Data Keuangan</span>
-                    <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-indigo-700 bg-indigo-50/80 px-3 py-1.5 rounded-xl border border-indigo-100">
-                        <input type="checkbox" id="mode31Hari" onchange="renderTabel()" class="rounded text-indigo-600 focus:ring-indigo-500">
-                        Tampilkan Tabel Penuh 31 Hari (Sesuai Bulan Dipilih)
-                    </label>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                    <div class="sm:col-span-4">
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Tampilkan data keuangan mulai tanggal</label>
+                    <div class="sm:col-span-5">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Mulai Tanggal</label>
                         <input type="date" id="filterTglMulai" onchange="renderTabel()" class="w-full text-xs border border-slate-200 rounded-xl p-2.5 bg-slate-50/50">
                     </div>
-                    <div class="sm:col-span-4">
-                        <label class="block text-xs font-medium text-slate-500 mb-1">sampai tanggal</label>
+                    <div class="sm:col-span-5">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Sampai Tanggal</label>
                         <input type="date" id="filterTglSampai" onchange="renderTabel()" class="w-full text-xs border border-slate-200 rounded-xl p-2.5 bg-slate-50/50">
                     </div>
-                    <div class="sm:col-span-3">
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Pilih Bulan (untuk mode 31 hari)</label>
-                        <input type="month" id="filterBulan" onchange="renderTabel()" class="w-full text-xs border border-slate-200 rounded-xl p-2.5 bg-slate-50/50">
-                    </div>
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-2">
                         <button type="button" onclick="resetFilter()" class="w-full py-2.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition" title="Reset Filter">
                             Reset
                         </button>
@@ -480,7 +472,7 @@
         </div>
     </div>
 
-    <!-- Script Logika Auth, Sidebar Toggle, Google Drive, Filter & Tabel 31 Hari -->
+    <!-- Script Logika Auth, Sidebar Toggle, Google Drive, Filter & Tabel -->
     <script>
         // Logika Sidebar Drawer
         const sidebar = document.getElementById('sidebar');
@@ -527,11 +519,6 @@
 
         let transaksiList = JSON.parse(localStorage.getItem('transaksi_kas_smk')) || [];
         document.getElementById('tanggal').valueAsDate = new Date();
-
-        // Set default filter bulan ke bulan saat ini (YYYY-MM)
-        const now = new Date();
-        const defaultYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        document.getElementById('filterBulan').value = defaultYearMonth;
 
         function setupAutoNumberFormat(inputEl) {
             inputEl.addEventListener('input', function (e) {
@@ -680,19 +667,9 @@
         let globalTotalKeluar = 0;
         let globalSaldoAkhir = 0;
 
-        function getJumlahHariDalamBulan(yearMonthStr) {
-            if (!yearMonthStr) {
-                const now = new Date();
-                return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            }
-            const [y, m] = yearMonthStr.split('-');
-            return new Date(Number(y), Number(m), 0).getDate();
-        }
-
         function resetFilter() {
             document.getElementById('filterTglMulai').value = '';
             document.getElementById('filterTglSampai').value = '';
-            document.getElementById('mode31Hari').checked = false;
             renderTabel();
         }
 
@@ -703,10 +680,8 @@
 
             const tglMulai = document.getElementById('filterTglMulai').value;
             const tglSampai = document.getElementById('filterTglSampai').value;
-            const mode31 = document.getElementById('mode31Hari').checked;
-            const filterBulanVal = document.getElementById('filterBulan').value;
 
-            // Filter data murni berdasar rentang jika diisi
+            // Filter data murni berdasar rentang tanggal mulai sampai tanggal sampai
             let filteredList = transaksiList.filter(item => {
                 if (tglMulai && item.tanggal < tglMulai) return false;
                 if (tglSampai && item.tanggal > tglSampai) return false;
@@ -720,117 +695,49 @@
             globalTotalMasuk = 0;
             globalTotalKeluar = 0;
 
-            if (mode31) {
-                // Mode tabel 31 hari penuh berdasarkan bulan yg dipilih
-                let [yearStr, monthStr] = (filterBulanVal || defaultYearMonth).split('-');
-                let year = Number(yearStr);
-                let month = Number(monthStr);
-                let maxDays = getJumlahHariDalamBulan(filterBulanVal || defaultYearMonth);
-
-                emptyState.classList.add('hidden');
-                document.getElementById('jumlahData').innerText = `${maxDays} Baris Hari (${monthStr}/${yearStr})`;
-
-                let rowCounter = 1;
-                for (let d = 1; d <= maxDays; d++) {
-                    let formattedDay = String(d).padStart(2, '0');
-                    let currentFullDate = `${yearStr}-${String(month).padStart(2, '0')}-${formattedDay}`;
-
-                    // Ambil semua transaksi pada tanggal tersebut dalam filteredList
-                    let dayTransactions = filteredList.filter(t => t.tanggal === currentFullDate);
-
-                    if (dayTransactions.length === 0) {
-                        let tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-50/80 transition";
-                        tr.innerHTML = `
-                            <td class="py-3 px-4 text-center text-slate-400 font-medium">${rowCounter++}</td>
-                            <td class="py-3 px-4 text-slate-600">${currentFullDate}</td>
-                            <td class="py-3 px-4 text-slate-300 italic">- Kosong -</td>
-                            <td class="py-3 px-4 text-right text-emerald-600 font-medium">-</td>
-                            <td class="py-3 px-4 text-right text-rose-600 font-medium">-</td>
-                            <td class="py-3 px-4 text-right text-slate-900 font-semibold">Rp ${formatRupiah(saldoBerjalan)}</td>
-                            <td class="py-3 px-4 text-center no-print col-aksi">-</td>
-                        `;
-                        tbody.appendChild(tr);
-                    } else {
-                        dayTransactions.forEach(item => {
-                            let origIdx = transaksiList.findIndex(x => x === item);
-                            let masuk = item.jenis === 'masuk' ? Number(item.nominal) : 0;
-                            let keluar = item.jenis === 'keluar' ? Number(item.nominal) : 0;
-
-                            saldoBerjalan = saldoBerjalan + masuk - keluar;
-                            globalTotalMasuk += masuk;
-                            globalTotalKeluar += keluar;
-
-                            let tr = document.createElement('tr');
-                            tr.className = "hover:bg-slate-50/80 transition";
-                            tr.innerHTML = `
-                                <td class="py-3 px-4 text-center text-slate-400 font-medium">${rowCounter++}</td>
-                                <td class="py-3 px-4 text-slate-600">${item.tanggal}</td>
-                                <td class="py-3 px-4 text-slate-800 font-medium">${item.uraian}</td>
-                                <td class="py-3 px-4 text-right text-emerald-600 font-medium">${masuk ? 'Rp ' + formatRupiah(masuk) : '-'}</td>
-                                <td class="py-3 px-4 text-right text-rose-600 font-medium">${keluar ? 'Rp ' + formatRupiah(keluar) : '-'}</td>
-                                <td class="py-3 px-4 text-right text-slate-900 font-semibold">Rp ${formatRupiah(saldoBerjalan)}</td>
-                                <td class="py-3 px-4 text-center no-print col-aksi">
-                                    <div class="flex items-center justify-center gap-1">
-                                        <button onclick="bukaModalUpdate(${origIdx})" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 text-[11px] font-semibold px-2 py-1 rounded-lg transition" title="Edit">
-                                            Edit
-                                        </button>
-                                        <button onclick="bukaModalHapus(${origIdx})" class="text-slate-400 hover:text-rose-600 transition p-1" title="Hapus">
-                                            ✕
-                                        </button>
-                                    </div>
-                                </td>
-                            `;
-                            tbody.appendChild(tr);
-                        });
-                    }
-                }
-            } else {
-                // Mode Standar (hanya baris ber-transaksi dalam filter)
-                if (filteredList.length === 0) {
-                    emptyState.classList.remove('hidden');
-                    document.getElementById('jumlahData').innerText = '0 Transaksi';
-                    document.getElementById('summaryMasuk').innerText = 'Rp 0';
-                    document.getElementById('summaryKeluar').innerText = 'Rp 0';
-                    document.getElementById('summarySaldo').innerText = 'Rp 0';
-                    return;
-                }
-
-                emptyState.classList.add('hidden');
-                document.getElementById('jumlahData').innerText = `${filteredList.length} Transaksi`;
-
-                filteredList.forEach((item, index) => {
-                    let origIdx = transaksiList.findIndex(x => x === item);
-                    let masuk = item.jenis === 'masuk' ? Number(item.nominal) : 0;
-                    let keluar = item.jenis === 'keluar' ? Number(item.nominal) : 0;
-
-                    saldoBerjalan = saldoBerjalan + masuk - keluar;
-                    globalTotalMasuk += masuk;
-                    globalTotalKeluar += keluar;
-
-                    let tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50/80 transition";
-                    tr.innerHTML = `
-                        <td class="py-3 px-4 text-center text-slate-400 font-medium">${index + 1}</td>
-                        <td class="py-3 px-4 text-slate-600">${item.tanggal}</td>
-                        <td class="py-3 px-4 text-slate-800 font-medium">${item.uraian}</td>
-                        <td class="py-3 px-4 text-right text-emerald-600 font-medium">${masuk ? 'Rp ' + formatRupiah(masuk) : '-'}</td>
-                        <td class="py-3 px-4 text-right text-rose-600 font-medium">${keluar ? 'Rp ' + formatRupiah(keluar) : '-'}</td>
-                        <td class="py-3 px-4 text-right text-slate-900 font-semibold">Rp ${formatRupiah(saldoBerjalan)}</td>
-                        <td class="py-3 px-4 text-center no-print col-aksi">
-                            <div class="flex items-center justify-center gap-1">
-                                <button onclick="bukaModalUpdate(${origIdx})" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 text-[11px] font-semibold px-2 py-1 rounded-lg transition" title="Edit">
-                                    Edit
-                                </button>
-                                <button onclick="bukaModalHapus(${origIdx})" class="text-slate-400 hover:text-rose-600 transition p-1" title="Hapus">
-                                    ✕
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            if (filteredList.length === 0) {
+                emptyState.classList.remove('hidden');
+                document.getElementById('jumlahData').innerText = '0 Transaksi';
+                document.getElementById('summaryMasuk').innerText = 'Rp 0';
+                document.getElementById('summaryKeluar').innerText = 'Rp 0';
+                document.getElementById('summarySaldo').innerText = 'Rp 0';
+                return;
             }
+
+            emptyState.classList.add('hidden');
+            document.getElementById('jumlahData').innerText = `${filteredList.length} Transaksi`;
+
+            filteredList.forEach((item, index) => {
+                let origIdx = transaksiList.findIndex(x => x === item);
+                let masuk = item.jenis === 'masuk' ? Number(item.nominal) : 0;
+                let keluar = item.jenis === 'keluar' ? Number(item.nominal) : 0;
+
+                saldoBerjalan = saldoBerjalan + masuk - keluar;
+                globalTotalMasuk += masuk;
+                globalTotalKeluar += keluar;
+
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center text-slate-400 font-medium">${index + 1}</td>
+                    <td class="py-3 px-4 text-slate-600">${item.tanggal}</td>
+                    <td class="py-3 px-4 text-slate-800 font-medium">${item.uraian}</td>
+                    <td class="py-3 px-4 text-right text-emerald-600 font-medium">${masuk ? 'Rp ' + formatRupiah(masuk) : '-'}</td>
+                    <td class="py-3 px-4 text-right text-rose-600 font-medium">${keluar ? 'Rp ' + formatRupiah(keluar) : '-'}</td>
+                    <td class="py-3 px-4 text-right text-slate-900 font-semibold">Rp ${formatRupiah(saldoBerjalan)}</td>
+                    <td class="py-3 px-4 text-center no-print col-aksi">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="bukaModalUpdate(${origIdx})" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 text-[11px] font-semibold px-2 py-1 rounded-lg transition" title="Edit">
+                                Edit
+                            </button>
+                            <button onclick="bukaModalHapus(${origIdx})" class="text-slate-400 hover:text-rose-600 transition p-1" title="Hapus">
+                                ✕
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
 
             globalSaldoAkhir = saldoBerjalan;
             document.getElementById('summaryMasuk').innerText = 'Rp ' + formatRupiah(globalTotalMasuk);
