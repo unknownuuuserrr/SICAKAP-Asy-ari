@@ -174,8 +174,8 @@
                     <button onclick="gantiModul('yayasan', 'Alur Kas Keuangan Yayasan')" id="menu-yayasan" class="w-full text-left px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-semibold transition">
                         1. Alur Kas Yayasan
                     </button>
-                    <button onclick="gantiModul('bopp', 'Buku Kas BOPP')" id="menu-bopp" class="w-full text-left px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-medium transition">
-                        2. Buku Kas BOPP
+                    <button onclick="gantiModul('BPOPP', 'Buku Kas BPOPP')" id="menu-BPOPP" class="w-full text-left px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-medium transition">
+                        2. Buku Kas BPOPP
                     </button>
                     <button onclick="gantiModul('kelas12', 'Biaya Pendidikan Kelas 12')" id="menu-kelas12" class="w-full text-left px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-medium transition">
                         3. Biaya Pend. Kelas 12
@@ -554,12 +554,12 @@
                 titleTable: 'Riwayat Buku Kas Yayasan',
                 titlePrint: 'LAPORAN ALUR KAS KEUANGAN YAYASAN'
             },
-            'bopp': {
-                key: 'transaksi_kas_bopp',
-                backupName: 'backup_buku_kas_bopp.json',
-                titleHeader: 'Buku Kas BOPP',
-                titleTable: 'Riwayat Buku Kas BOPP',
-                titlePrint: 'LAPORAN BUKU KAS BOPP'
+            'BPOPP': {
+                key: 'transaksi_kas_BPOPP',
+                backupName: 'backup_buku_kas_BPOPP.json',
+                titleHeader: 'Buku Kas BPOPP',
+                titleTable: 'Riwayat Buku Kas BPOPP',
+                titlePrint: 'LAPORAN BUKU KAS BPOPP'
             },
             'kelas12': {
                 key: 'transaksi_spp_kelas_12',
@@ -608,7 +608,7 @@
             document.getElementById('printTitleLabel').innerText = currentConfig.titlePrint;
 
             // Highlight menu aktif di sidebar
-            ['yayasan', 'bopp', 'kelas12', 'kelas11'].forEach(k => {
+            ['yayasan', 'BPOPP', 'kelas12', 'kelas11'].forEach(k => {
                 const btnEl = document.getElementById(`menu-${k}`);
                 if (k === modulKey) {
                     btnEl.className = 'w-full text-left px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-semibold transition';
